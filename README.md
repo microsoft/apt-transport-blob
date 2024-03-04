@@ -4,6 +4,32 @@ A transport which allows installation of Debian packages from Azure Blob Storage
 
 Implements the APT method interface as documented [here](http://www.fifi.org/doc/libapt-pkg-doc/method.html/ch2.html).
 
+## Building
+
+### Executable
+
+To build the `blob` executable, use `cargo`:
+
+```bash
+cargo build --release
+```
+
+This creates the `blob` executable in your standard Cargo output directory,
+usually `target/release`.
+
+### Debian package
+
+To create a Debian package, use `cargo deb`:
+
+```bash
+$ cargo deb
+    Finished release [optimized] target(s) in 0.43s
+/code/apt-transport-blob/target/debian/apt-transport-blob_<version>_amd64.deb
+```
+
+This creates a Debian package in `target/debian`. It contains the `blob`
+executable which installs to `/usr/lib/apt/methods/blob`.
+
 ## Usage
 
 To use this tool, it needs to be installed in `/usr/lib/apt/methods` as `blob`.
