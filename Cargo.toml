@@ -16,7 +16,7 @@ path = "src/main.rs"
 
 [dependencies]
 azure_identity = "0.19.0"
-azure_storage = "0.19.0"
+azure_storage = "0.20.0"
 azure_storage_blobs = "0.19.0"
 bytes = "1.6.0"
 log = "0.4.20"
