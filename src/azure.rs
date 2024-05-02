@@ -2,10 +2,7 @@
 // Licensed under the MIT License.
 use std::sync::Arc;
 
-use azure_identity::{
-    AzureCliCredential, DefaultAzureCredential, DefaultAzureCredentialEnum, EnvironmentCredential,
-    ImdsManagedIdentityCredential,
-};
+use azure_identity::DefaultAzureCredential;
 use azure_storage::StorageCredentials;
 use azure_storage_blobs::{
     blob::operations::GetPropertiesResponse,
@@ -72,15 +69,7 @@ pub(crate) struct AzureRegistry {
 impl AzureRegistry {
     pub fn new() -> Self {
         // Get a credential for Azure
-        //
-        // Prioritise AzureCli above ManagedIdentity - this makes local operation
-        // work a lot faster.
-        let sources = vec![
-            DefaultAzureCredentialEnum::Environment(EnvironmentCredential::default()),
-            DefaultAzureCredentialEnum::AzureCli(AzureCliCredential::new()),
-            DefaultAzureCredentialEnum::ManagedIdentity(ImdsManagedIdentityCredential::default()),
-        ];
-        let credential = DefaultAzureCredential::with_sources(sources);
+        let credential = DefaultAzureCredential::default();
         AzureRegistry {
             credential: Arc::new(credential),
         }

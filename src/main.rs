@@ -2,9 +2,13 @@
 // Licensed under the MIT License.
 use bytes::BufMut;
 
-use log::{debug, error, info};
+use log::{debug, error, info, LevelFilter, Record};
+use log4rs::filter::{Filter, Response};
 use message::{Message, MessageType};
-use simple_log::LogConfigBuilder;
+
+use log4rs::append::file::FileAppender;
+use log4rs::config::{Appender, Config, Root};
+use log4rs::encode::pattern::PatternEncoder;
 
 mod azure;
 mod message;
@@ -15,25 +19,57 @@ fn send_capabilities() {
     let version = env!("CARGO_PKG_VERSION");
     Message::new(
         MessageType::Capabilities,
-        vec![("Version", version), ("Send-Config", "true")],
+        vec![
+            ("Version", version),
+            ("Send-Config", "true"),
+            ("Single-Instance", "true"),
+        ],
     )
     .send()
 }
 
 // LCOV_EXCL_START
 
+#[derive(Debug)]
+pub struct AzureTransportFilter {}
+impl Filter for AzureTransportFilter {
+    fn filter(&self, record: &Record) -> Response {
+        match record.module_path() {
+            Some(module) => {
+                if module.starts_with("azure_core::policies::transport") {
+                    Response::Reject
+                } else {
+                    Response::Neutral
+                }
+            }
+            None => Response::Neutral,
+        }
+    }
+}
+
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
+    let azure_filter = Box::new(AzureTransportFilter {});
+
     // Set up the logger to log to the /var/log directory
-    let config = LogConfigBuilder::builder()
-        .path("/var/log/apt-transport-blob.log")
-        .size(100)
-        .roll_count(10)
-        .time_format("%Y-%m-%d %H:%M:%S.%f") //E.g:%H:%M:%S.%f
-        .level("debug")
-        .output_file()
-        .build();
-    simple_log::new(config)?;
+    let appender = FileAppender::builder()
+        .encoder(Box::new(PatternEncoder::new("{d} [{l}] <{M}:{L}> {m}{n}")))
+        .build("/var/log/apt-transport-blob.log")?;
+
+    let config = Config::builder()
+        .appender(
+            Appender::builder()
+                // Ensure secure logs aren't logged out
+                .filter(azure_filter)
+                .build("default", Box::new(appender)),
+        )
+        .build(
+            Root::builder()
+                .appender("default")
+                .build(LevelFilter::Debug),
+        )?;
+
+    let _handle = log4rs::init_config(config)?;
 
     // Set up a message Processor
     let processor = processor::Processor::new();

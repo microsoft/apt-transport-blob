@@ -15,6 +15,8 @@ Status: In development
 ### Added
 
 ### Fixed
+- Only run a single instance of the tool instead of multiple when resolving packages
+- Switch to log4rs for logging as it has more control over output
 
 ## [0.1.0] - 2024-03-04
 
