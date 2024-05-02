@@ -72,7 +72,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let _handle = log4rs::init_config(config)?;
 
     // Set up a message Processor
-    let processor = processor::Processor::new();
+    let processor = processor::Processor::new()?;
 
     let mut input_buffer = vec![];
 

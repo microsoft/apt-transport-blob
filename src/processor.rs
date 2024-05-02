@@ -26,10 +26,10 @@ pub struct Processor {
 }
 
 impl Processor {
-    pub fn new() -> Self {
-        Processor {
-            azure_registry: AzureRegistry::new(),
-        }
+    pub fn new() -> Result<Self, Box<dyn std::error::Error>> {
+        Ok(Processor {
+            azure_registry: AzureRegistry::new()?,
+        })
     }
 
     pub async fn process(&self, message: Message) -> Result<(), Box<dyn std::error::Error>> {
@@ -116,7 +116,7 @@ mod tests {
     async fn test_configuration() -> Result<(), Box<dyn std::error::Error>> {
         init_logger();
         let message = Message::new(MessageType::Configuration, vec![]);
-        let processor = Processor::new();
+        let processor = Processor::new()?;
         processor.process(message).await?;
         Ok(())
     }
@@ -125,7 +125,7 @@ mod tests {
     async fn test_unknown() -> Result<(), Box<dyn std::error::Error>> {
         init_logger();
         let message = Message::new(MessageType::Log, vec![]);
-        let processor = Processor::new();
+        let processor = Processor::new()?;
         processor.process(message).await?;
         Ok(())
     }
