@@ -2,10 +2,7 @@
 // Licensed under the MIT License.
 use std::sync::Arc;
 
-use azure_identity::{
-    AzureCliCredential, DefaultAzureCredential, DefaultAzureCredentialEnum, EnvironmentCredential,
-    ImdsManagedIdentityCredential,
-};
+use azure_identity::{DefaultAzureCredential, DefaultAzureCredentialBuilder};
 use azure_storage::StorageCredentials;
 use azure_storage_blobs::{
     blob::operations::GetPropertiesResponse,
@@ -70,20 +67,12 @@ pub(crate) struct AzureRegistry {
 }
 
 impl AzureRegistry {
-    pub fn new() -> Self {
+    pub fn new() -> Result<Self, Box<dyn std::error::Error>> {
         // Get a credential for Azure
-        //
-        // Prioritise AzureCli above ManagedIdentity - this makes local operation
-        // work a lot faster.
-        let sources = vec![
-            DefaultAzureCredentialEnum::Environment(EnvironmentCredential::default()),
-            DefaultAzureCredentialEnum::AzureCli(AzureCliCredential::new()),
-            DefaultAzureCredentialEnum::ManagedIdentity(ImdsManagedIdentityCredential::default()),
-        ];
-        let credential = DefaultAzureCredential::with_sources(sources);
-        AzureRegistry {
+        let credential = DefaultAzureCredentialBuilder::new().build()?;
+        Ok(AzureRegistry {
             credential: Arc::new(credential),
-        }
+        })
     }
 
     pub fn get_blob(&self, url: &Url) -> Result<AzureBlob, Box<dyn std::error::Error>> {
