@@ -13,9 +13,6 @@ use url::Url;
 
 #[derive(Debug)]
 pub struct AzureBlob {
-    pub account: String,
-    pub container_name: String,
-    pub blob_name: String,
     blob_client: BlobClient,
 }
 
@@ -32,12 +29,7 @@ impl AzureBlob {
 
         let blob_client = azure_registry.get_blob_client(account, container_name, &blob_name);
 
-        Ok(AzureBlob {
-            account: account.to_string(),
-            container_name: container_name.to_string(),
-            blob_name,
-            blob_client,
-        })
+        Ok(AzureBlob { blob_client })
     }
 
     pub async fn exists(&self) -> Result<bool, Box<dyn std::error::Error>> {
