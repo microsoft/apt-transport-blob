@@ -8,10 +8,10 @@ updates:
     assignees:
       - "maxdymond"
     groups:
-      # Group together azure crates
-      azure:
+      # Group together all dependency updates
+      everything:
         patterns:
-          - "azure-*"
+          - "*"
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
